@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ดูดวงพิกเซล — Thai Pixel Oracle</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+/* ─── PIXEL PALETTE ─────────────────────────── */
+:root {
+  --sky1:#FFB5C8; --sky2:#C8A8E9; --sky3:#A8D8EA;
+  --ground:#5B9E4F; --ground2:#3D7A33;
+  --pixel-pink:#FF69B4; --pixel-purple:#C084FC;
+  --pixel-yellow:#FFD700; --pixel-cyan:#67E8F9;
+  --pixel-orange:#FB923C; --pixel-green:#4ADE80;
+  --pixel-red:#F87171; --pixel-blue:#60A5FA;
+  --dark:#1a0a2e; --darker:#0d0620;
+  --text-light:#FFF5FF; --text-muted:#D8B4FE;
+  --card-bg:rgba(20,8,40,0.88);
+  --border-pixel:#C084FC;
+  --gold:#FFD700; --gold2:#FFA500;
+}
+*{margin:0;padding:0;box-sizing:border-box;image-rendering:pixelated}
+html{font-size:16px}
+body{
+  font-family:'Sarabun',sans-serif;
+  background:var(--darker);
+  min-height:100vh;
+  overflow-x:hidden;
+  cursor:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='20' height='20'><text y='16' font-size='16'>✨</text></svg>") 8 8, auto;
+}
+
+/* ─── PIXEL SKY BG ────────────────────────── */
+.sky-bg {
+  position:fixed; inset:0; z-index:0;
+  background: linear-gradient(180deg,
+    #2D1B5E 0%, #4A2C8A 20%, #7B4AB8 40%,
+    #C4729C 65%, #F0A07A 80%, #F5C08A 100%);
+}
+/* pixel clouds */
+.cloud {
+  position:fixed; image-rendering:pixelated;
+  animation: cloudDrift linear infinite;
+  opacity:0.7;
+}
+@keyframes cloudDrift { from{transform:translateX(-200px)} to{transform:translateX(110vw)} }
+
+/* pixel ground strip */
+.ground-strip {
+  position:fixed; bottom:0; left:0; right:0; height:120px; z-index:1;
+  background: repeating-linear-gradient(
+    0deg,
+    var(--ground2) 0px, var(--ground2) 8px,
+    var(--ground) 8px, var(--ground) 16px
+  );
+  box-shadow: inset 0 4px 0 rgba(255,255,255,0.15);
+}
+.ground-strip::before {
+  content:'';
+  position:absolute; top:-8px; left:0; right:0; height:8px;
+  background: repeating-linear-gradient(90deg,
+    var(--ground) 0,var(--ground) 8px,
+    var(--ground2) 8px,var(--ground2) 16px,
+    var(--pixel-green) 16px,var(--pixel-green) 24px,
+    var(--ground) 24px,var(--ground) 32px
+  );
+}
+
+/* pixel stars */
+.star-layer { position:fixed; inset:0; z-index:0; pointer-events:none }
+.px-star {
+  position:absolute; width:4px; height:4px;
+  background:white; image-rendering:pixelated;
+  animation: starBlink 2s steps(2,end) infinite;
+}
+@keyframes starBlink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+/* floating pixel characters */
+.float-char {
+  position:fixed; z-index:2; pointer-events:none;
+  animation: floatBob 3s ease-in-out infinite alternate;
+  image-rendering:pixelated;
+}
+@keyframes floatBob {
+  from{transform:translateY(0px)} to{transform:translateY(-14px)}
+}
+
+/* ─── MAIN LAYOUT ──────────────────────────── */
+.page-wrap {
+  position:relative; z-index:10;
+  min-height:100vh;
+  display:flex; flex-direction:column;
+  align-items:center;
+  padding:16px 12px 100px;
+}
+
+/* ─── HEADER ───────────────────────────────── */
+.pixel-header {
+  text-align:center; margin-bottom:20px;
+  padding-top:10px;
+}
+.header-badge {
+  display:inline-block;
+  background:var(--darker);
+  border:4px solid var(--gold);
+  box-shadow: 4px 4px 0 var(--gold2), inset 2px 2px 0 rgba(255,215,0,.2);
+  padding:8px 20px 10px;
+  margin-bottom:14px;
+  position:relative;
+}
+.header-badge::before,.header-badge::after {
+  content:'★';
+  position:absolute; top:50%; transform:translateY(-50%);
+  color:var(--gold); font-size:1rem;
+}
+.header-badge::before{left:8px} .header-badge::after{right:8px}
+.header-title {
+  font-family:'Press Start 2P', monospace;
+  font-size:clamp(0.65rem,2.5vw,0.95rem);
+  color:var(--gold);
+  text-shadow: 2px 2px 0 var(--gold2), 4px 4px 0 rgba(0,0,0,.5);
+  line-height:1.6; letter-spacing:0.02em;
+}
+.header-sub {
+  font-family:'Sarabun',sans-serif;
+  font-size:clamp(0.7rem,2vw,0.85rem);
+  color:var(--pixel-cyan);
+  margin-top:6px; letter-spacing:0.1em;
+  text-shadow: 1px 1px 0 rgba(0,0,0,.8);
+}
+
+/* pixel sprite marquee */
+.sprite-row {
+  display:flex; justify-content:center; gap:16px;
+  margin:8px 0 16px; flex-wrap:wrap;
+}
+.sprite-icon {
+  width:32px; height:32px;
+  animation: floatBob 2.5s ease-in-out infinite alternate;
+  filter: drop-shadow(0 4px 6px rgba(0,0,0,.4));
+  cursor:pointer; transition:transform .1s;
+  image-rendering:pixelated;
+}
+.sprite-icon:hover{transform:scale(1.4) rotate(-5deg)!important}
+.sprite-icon:nth-child(2){animation-delay:.3s}
+.sprite-icon:nth-child(3){animation-delay:.6s}
+.sprite-icon:nth-child(4){animation-delay:.9s}
+.sprite-icon:nth-child(5){animation-delay:1.2s}
+.sprite-icon:nth-child(6){animation-delay:1.5s}
+.sprite-icon:nth-child(7){animation-delay:1.8s}
+
+/* ─── PIXEL CARD ───────────────────────────── */
+.pixel-card {
+  background:var(--card-bg);
+  border:4px solid var(--border-pixel);
+  box-shadow:
+    6px 6px 0 rgba(192,132,252,.4),
+    inset 0 0 30px rgba(160,100,255,.08),
+    0 0 40px rgba(192,132,252,.2);
+  border-radius:0;
+  width:100%; max-width:480px;
+  padding:20px;
+  position:relative;
+  overflow:hidden;
+}
+.pixel-card::before {
+  content:'';
+  position:absolute; inset:4px;
+  border:2px solid rgba(192,132,252,.25);
+  pointer-events:none;
+}
+/* corner decorations */
+.pixel-card::after {
+  content:'';
+  position:absolute;
+  top:0;left:0;right:0; height:4px;
+  background:repeating-linear-gradient(90deg,
+    var(--pixel-pink) 0,var(--pixel-pink) 8px,
+    var(--pixel-purple) 8px,var(--pixel-purple) 16px,
+    var(--pixel-cyan) 16px,var(--pixel-cyan) 24px,
+    var(--pixel-yellow) 24px,var(--pixel-yellow) 32px
+  );
+}
+.card-corner {
+  position:absolute; width:16px; height:16px;
+  background:var(--gold);
+  box-shadow:inset -2px -2px 0 var(--gold2);
+}
+.cc-tl{top:0;left:0} .cc-tr{top:0;right:0} .cc-bl{bottom:0;left:0} .cc-br{bottom:0;right:0}
+
+.card-title {
+  font-family:'Press Start 2P', monospace;
+  font-size:0.6rem; color:var(--pixel-cyan);
+  text-align:center; margin-bottom:16px;
+  letter-spacing:0.05em;
+  text-shadow:1px 1px 0 rgba(0,0,0,.8);
+}
+.card-title span{color:var(--pixel-pink)}
+
+/* ─── FORM ELEMENTS ─────────────────────────── */
+.form-row { display:flex; gap:8px; margin-bottom:12px; }
+.form-group { flex:1; display:flex; flex-direction:column; gap:5px; }
+.pixel-label {
+  font-family:'Press Start 2P', monospace;
+  font-size:0.45rem; color:var(--pixel-yellow);
+  letter-spacing:0.05em; text-shadow:1px 1px 0 rgba(0,0,0,.8);
+}
+.pixel-input, .pixel-select {
+  background:#0d0620;
+  border:3px solid var(--pixel-purple);
+  color:var(--text-light);
+  font-family:'Sarabun',sans-serif;
+  font-size:0.95rem; font-weight:600;
+  padding:8px 10px;
+  outline:none;
+  transition:border-color .1s;
+  width:100%;
+  box-shadow: 3px 3px 0 rgba(192,132,252,.3);
+  border-radius:0;
+  -webkit-appearance:none; appearance:none;
+}
+.pixel-input:focus, .pixel-select:focus {
+  border-color:var(--pixel-cyan);
+  box-shadow: 3px 3px 0 rgba(103,232,249,.4);
+  background:#150830;
+}
+.pixel-input::placeholder{color:rgba(255,255,255,.3)}
+.select-wrap { position:relative }
+.select-wrap::after {
+  content:'▼'; position:absolute; right:10px; top:50%;
+  transform:translateY(-50%);
+  color:var(--pixel-yellow); font-size:0.6rem;
+  pointer-events:none;
+}
+.pixel-select option{background:#0d0620;color:var(--text-light)}
+
+/* ─── BUTTON ────────────────────────────────── */
+.pixel-btn {
+  display:block; width:100%;
+  background:linear-gradient(180deg,#FF79C6,#BD5EAA);
+  border:none; border-bottom:5px solid #7B2D6E;
+  border-right:5px solid #7B2D6E;
+  color:white;
+  font-family:'Press Start 2P', monospace;
+  font-size:0.55rem;
+  letter-spacing:0.08em;
+  padding:12px 16px;
+  cursor:pointer;
+  text-transform:uppercase;
+  transition:all .1s;
+  text-shadow:1px 2px 0 rgba(0,0,0,.5);
+  box-shadow: 0 0 20px rgba(255,121,198,.4);
+  margin-top:4px;
+  position:relative; overflow:hidden;
+}
+.pixel-btn::before {
+  content:''; position:absolute; inset:0;
+  background:linear-gradient(135deg,rgba(255,255,255,.2) 0%,transparent 50%);
+}
+.pixel-btn:hover{
+  background:linear-gradient(180deg,#FF93D2,#D068BF);
+  box-shadow:0 0 35px rgba(255,121,198,.7);
+  transform:translateY(-2px);
+}
+.pixel-btn:active{
+  transform:translateY(3px);
+  border-bottom-width:2px; border-right-width:2px;
+}
+
+/* ─── RESULT PANEL ──────────────────────────── */
+.result-panel {
+  width:100%; max-width:480px;
+  margin-top:14px;
+  display:none;
+  animation:fadePixel .4s steps(4,end);
+}
+@keyframes fadePixel {
+  from{opacity:0;transform:translateY(16px)}
+  to{opacity:1;transform:translateY(0)}
+}
+.result-panel.show{display:block}
+
+/* result header with character */
+.result-header {
+  display:flex; align-items:center; gap:12px;
+  background:var(--card-bg);
+  border:4px solid var(--gold);
+  box-shadow:4px 4px 0 rgba(255,215,0,.3);
+  padding:12px 16px;
+  margin-bottom:10px;
+  position:relative;
+}
+.result-header::after{
+  content:'';
+  position:absolute;
+  bottom:-4px; left:0; right:0; height:4px;
+  background:repeating-linear-gradient(90deg,
+    var(--gold) 0,var(--gold) 8px,
+    var(--gold2) 8px,var(--gold2) 16px
+  );
+}
+.char-sprite {
+  width:56px; height:56px; flex-shrink:0;
+  image-rendering:pixelated;
+  animation:floatBob 2s ease-in-out infinite alternate;
+}
+.result-name-block {}
+.result-day-label {
+  font-family:'Press Start 2P', monospace;
+  font-size:0.55rem; color:var(--pixel-cyan);
+  margin-bottom:4px;
+}
+.result-day-name {
+  font-family:'Press Start 2P', monospace;
+  font-size:0.85rem; color:var(--gold);
+  text-shadow:2px 2px 0 var(--gold2), 3px 3px 0 rgba(0,0,0,.5);
+}
+.result-day-en {
+  font-size:0.7rem; color:var(--text-muted);
+  margin-top:2px; font-family:'Sarabun',sans-serif;
+}
+
+/* stat bars */
+.stat-section {
+  background:var(--card-bg);
+  border:4px solid var(--pixel-purple);
+  box-shadow:4px 4px 0 rgba(192,132,252,.3);
+  padding:14px;
+  margin-bottom:10px;
+}
+.stat-title {
+  font-family:'Press Start 2P', monospace;
+  font-size:0.5rem; color:var(--pixel-yellow);
+  margin-bottom:10px; text-align:center;
+}
+.stat-row { margin-bottom:8px }
+.stat-label-row {
+  display:flex; justify-content:space-between;
+  margin-bottom:3px;
+}
+.stat-name {
+  font-size:0.78rem; color:var(--text-light);
+  font-family:'Sarabun',sans-serif;
+}
+.stat-score {
+  font-family:'Press Start 2P', monospace;
+  font-size:0.45rem; color:var(--pixel-yellow);
+}
+.pixel-bar-track {
+  height:12px; background:#1a0a2e;
+  border:2px solid rgba(255,255,255,.15);
+  overflow:hidden;
+}
+.pixel-bar-fill {
+  height:100%;
+  transition:width .8s steps(8,end);
+  image-rendering:pixelated;
+}
+
+/* prophecy cards */
+.prophecy-grid {
+  display:grid; grid-template-columns:1fr 1fr;
+  gap:8px; margin-bottom:10px;
+}
+.proph-card {
+  background:var(--card-bg);
+  border:3px solid;
+  padding:10px;
+  position:relative; overflow:hidden;
+}
+.proph-card::after {
+  content:attr(data-icon);
+  position:absolute; bottom:-2px; right:4px;
+  font-size:1.4rem; opacity:.15;
+}
+.proph-title {
+  font-family:'Press Start 2P', monospace;
+  font-size:0.42rem; margin-bottom:6px;
+}
+.proph-text {
+  font-family:'Sarabun',sans-serif;
+  font-size:0.75rem; color:var(--text-light);
+  line-height:1.5;
+}
+.proph-card.love{border-color:var(--pixel-pink)} .proph-card.love .proph-title{color:var(--pixel-pink)}
+.proph-card.money{border-color:var(--pixel-yellow)} .proph-card.money .proph-title{color:var(--pixel-yellow)}
+.proph-card.health{border-color:var(--pixel-green)} .proph-card.health .proph-title{color:var(--pixel-green)}
+.proph-card.luck{border-color:var(--pixel-cyan)} .proph-card.luck .proph-title{color:var(--pixel-cyan)}
+
+/* lucky items */
+.lucky-section {
+  background:var(--card-bg);
+  border:4px solid var(--pixel-cyan);
+  box-shadow:4px 4px 0 rgba(103,232,249,.25);
+  padding:14px;
+  margin-bottom:10px;
+}
+.lucky-grid {
+  display:grid; grid-template-columns:repeat(3,1fr);
+  gap:8px; margin-top:10px;
+}
+.lucky-item {
+  text-align:center; padding:8px 4px;
+  background:rgba(255,255,255,.05);
+  border:2px solid rgba(255,255,255,.1);
+}
+.lucky-icon {
+  font-size:1.4rem; display:block;
+  margin-bottom:4px; image-rendering:pixelated;
+}
+.lucky-label {
+  font-family:'Press Start 2P', monospace;
+  font-size:0.35rem; color:var(--text-muted);
+  display:block; margin-bottom:2px;
+}
+.lucky-val {
+  font-family:'Sarabun',sans-serif;
+  font-size:0.75rem; font-weight:700;
+  color:var(--text-light);
+}
+
+/* falling stars section */
+.falling-section {
+  background:var(--card-bg);
+  border:4px solid var(--pixel-yellow);
+  box-shadow:4px 4px 0 rgba(255,215,0,.3);
+  padding:14px;
+  margin-bottom:10px;
+}
+.falling-title {
+  font-family:'Press Start 2P', monospace;
+  font-size:0.5rem; color:var(--pixel-yellow);
+  text-align:center; margin-bottom:10px;
+}
+.falling-grid {
+  display:grid; grid-template-columns:repeat(2,1fr);
+  gap:8px;
+}
+.falling-item {
+  padding:8px;
+  background:rgba(255,215,0,.07);
+  border-left:3px solid var(--pixel-yellow);
+}
+.falling-date {
+  font-family:'Press Start 2P', monospace;
+  font-size:0.42rem; color:var(--pixel-yellow);
+  margin-bottom:3px;
+}
+.falling-desc {
+  font-family:'Sarabun',sans-serif;
+  font-size:0.75rem; color:var(--text-light);
+  line-height:1.4;
+}
+
+/* big prophecy text */
+.big-proph {
+  background:var(--card-bg);
+  border:4px solid var(--pixel-purple);
+  box-shadow:4px 4px 0 rgba(192,132,252,.3);
+  padding:16px;
+  margin-bottom:10px;
+}
+.big-proph-title {
+  font-family:'Press Start 2P', monospace;
+  font-size:0.5rem; color:var(--pixel-purple);
+  text-align:center; margin-bottom:10px;
+}
+.big-proph-text {
+  font-family:'Sarabun',sans-serif;
+  font-size:0.88rem; color:var(--text-light);
+  line-height:1.8; text-align:justify;
+}
+
+/* share btn */
+.share-btn {
+  display:block; width:100%;
+  background:linear-gradient(180deg,#60A5FA,#3B82F6);
+  border:none; border-bottom:4px solid #1D4ED8; border-right:4px solid #1D4ED8;
+  color:white; font-family:'Press Start 2P', monospace;
+  font-size:0.5rem; padding:10px;
+  cursor:pointer; text-align:center;
+  transition:all .1s;
+}
+.share-btn:active{transform:translate(2px,2px);border-bottom-width:2px;border-right-width:2px}
+
+/* pixel divider */
+.px-divider {
+  height:4px; margin:10px 0;
+  background:repeating-linear-gradient(90deg,
+    var(--pixel-pink) 0,var(--pixel-pink) 8px,
+    var(--pixel-purple) 8px,var(--pixel-purple) 16px,
+    var(--pixel-cyan) 16px,var(--pixel-cyan) 24px,
+    var(--pixel-yellow) 24px,var(--pixel-yellow) 32px
+  );
+}
+
+/* loading animation */
+.loading-dots {
+  display:flex; justify-content:center; gap:8px;
+  padding:20px 0;
+}
+.ld {
+  width:12px; height:12px; background:var(--pixel-pink);
+  animation:ldBlink 1s steps(2,end) infinite;
+}
+.ld:nth-child(2){background:var(--pixel-yellow);animation-delay:.33s}
+.ld:nth-child(3){background:var(--pixel-cyan);animation-delay:.66s}
+@keyframes ldBlink{0%,100%{opacity:1;transform:translateY(0)}50%{opacity:0;transform:translateY(-8px)}}
+
+/* ─── PIXEL SPRITES via SVG in CSS ────────────── */
+/* canvas for pixel character */
+canvas.sprite-canvas {
+  image-rendering:pixelated;
+  display:block;
+}
+
+/* sparkle overlay */
+.sparkle-overlay {
+  position:fixed; inset:0; pointer-events:none; z-index:5;
+  overflow:hidden;
+}
+.sp {
+  position:absolute;
+  width:8px; height:8px;
+  background:var(--pixel-yellow);
+  animation:spFall linear infinite;
+  image-rendering:pixelated;
+}
+@keyframes spFall {
+  0%{transform:translateY(-20px) rotate(0);opacity:1}
+  100%{transform:translateY(110vh) rotate(720deg);opacity:0}
+}
+
+/* ─── RESPONSIVE ─────────────────────────────── */
+@media(max-width:400px){
+  .prophecy-grid{grid-template-columns:1fr}
+  .lucky-grid{grid-template-columns:repeat(2,1fr)}
+  .falling-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- Sky BG -->
+<div class="sky-bg"></div>
+
+<!-- Stars -->
+<div class="star-layer" id="starLayer"></div>
+
+<!-- Sparkle overlay -->
+<div class="sparkle-overlay" id="sparkleOverlay"></div>
+
+<!-- Ground -->
+<div class="ground-strip"></div>
+
+<!-- Page -->
+<div class="page-wrap">
+
+  <!-- HEADER -->
+  <div class="pixel-header">
+    <div class="header-badge">
+      <div class="header-title">THAI PIXEL ORACLE<br>ดูดวงพิกเซล</div>
+    </div>
+    <div class="header-sub">⚡ ดูดวงตามวันเดือนปีเกิด · โหราศาสตร์ไทย ⚡</div>
+
+    <!-- Pixel sprite row using canvas -->
+    <div class="sprite-row" id="spriteRow"></div>
+  </div>
+
+  <!-- INPUT CARD -->
+  <div class="pixel-card" id="inputCard">
+    <div class="card-corner cc-tl"></div>
+    <div class="card-corner cc-tr"></div>
+    <div class="card-corner cc-bl"></div>
+    <div class="card-corner cc-br"></div>
+
+    <div class="card-title">INSERT YOUR <span>BIRTH DATE</span></div>
+
+    <div class="form-row">
+      <div class="form-group" style="flex:0.8">
+        <label class="pixel-label">วัน</label>
+        <input class="pixel-input" type="number" id="bDay" min="1" max="31" placeholder="01">
+      </div>
+      <div class="form-group" style="flex:1.2">
+        <label class="pixel-label">เดือน</label>
+        <div class="select-wrap">
+          <select class="pixel-select" id="bMonth">
+            <option value="1">มกราคม</option><option value="2">กุมภาพันธ์</option>
+            <option value="3">มีนาคม</option><option value="4">เมษายน</option>
+            <option value="5">พฤษภาคม</option><option value="6">มิถุนายน</option>
+            <option value="7">กรกฎาคม</option><option value="8">สิงหาคม</option>
+            <option value="9">กันยายน</option><option value="10">ตุลาคม</option>
+            <option value="11">พฤศจิกายน</option><option value="12">ธันวาคม</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group" style="flex:1">
+        <label class="pixel-label">ปี (พ.ศ.)</label>
+        <input class="pixel-input" type="number" id="bYear" min="2400" max="2600" placeholder="2530">
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="pixel-label">ชั่วโมงเกิด (ถ้าทราบ)</label>
+        <input class="pixel-input" type="number" id="bHour" min="0" max="23" placeholder="เช่น 13 (ไม่บังคับ)">
+      </div>
+      <div class="form-group">
+        <label class="pixel-label">นาทีเกิด</label>
+        <input class="pixel-input" type="number" id="bMin" min="0" max="59" placeholder="00">
+      </div>
+    </div>
+
+    <div class="px-divider"></div>
+
+    <button class="pixel-btn" onclick="castFortune()">
+      ✦ ดูดวงเลย / CAST SPELL ✦
+    </button>
+  </div>
+
+  <!-- RESULT PANEL -->
+  <div class="result-panel" id="resultPanel">
+
+    <!-- Day header -->
+    <div class="result-header">
+      <canvas class="char-sprite" id="charCanvas" width="56" height="56"></canvas>
+      <div class="result-name-block">
+        <div class="result-day-label">วันเกิดของคุณคือ</div>
+        <div class="result-day-name" id="rDayName">—</div>
+        <div class="result-day-en" id="rDayEn">—</div>
+        <div style="font-size:.72rem;color:var(--pixel-cyan);margin-top:3px;font-family:'Sarabun'" id="rElement">—</div>
+      </div>
+    </div>
+
+    <!-- Stat bars -->
+    <div class="stat-section">
+      <div class="stat-title">★ POWER STATS ★</div>
+      <div id="statBars"></div>
+    </div>
+
+    <!-- Prophecy 4 cards -->
+    <div class="prophecy-grid" id="prophecyGrid"></div>
+
+    <!-- Lucky items -->
+    <div class="lucky-section">
+      <div class="stat-title">✦ สิ่งมงคลประจำวันเกิด ✦</div>
+      <div class="lucky-grid" id="luckyGrid"></div>
+    </div>
+
+    <!-- Falling stars (วันตกฝาก) -->
+    <div class="falling-section">
+      <div class="falling-title">⚠ วันตกฝาก — ระวังเป็นพิเศษ ⚠</div>
+      <div style="font-family:'Sarabun';font-size:.78rem;color:var(--text-muted);text-align:center;margin-bottom:8px" id="rFallingDesc">วันที่ควรระมัดระวังตามโหราศาสตร์ไทย</div>
+      <div class="falling-grid" id="fallingGrid"></div>
+    </div>
+
+    <!-- Big prophecy -->
+    <div class="big-proph">
+      <div class="big-proph-title">✦ คำทำนายครั้งใหญ่ ✦</div>
+      <div class="big-proph-text" id="bigProph">—</div>
+    </div>
+
+    <div class="px-divider"></div>
+    <button class="share-btn" onclick="resetForm()">[ CAST AGAIN / ดูดวงใหม่ ]</button>
+  </div>
+
+</div><!-- page-wrap -->
+
+<script>
+// ═══ DATA ══════════════════════════════════════════════════
+const DAYS = ['อาทิตย์','จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์','เสาร์'];
+const DAYS_EN = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const DAY_COLORS = ['#FFD700','#E8E8E8','#FF6B6B','#A8D8A8','#FFA500','#87CEEB','#9B59B6'];
+const DAY_PALETTES = [
+  // Sunday - gold/red
+  {bg:'#1a0a0a',accent:'#FFD700',c1:'#FF6B35',c2:'#FFD700'},
+  // Monday - silver/white
+  {bg:'#0a0a1a',accent:'#C0C0C0',c1:'#87CEEB',c2:'#E8E8E8'},
+  // Tuesday - red/pink
+  {bg:'#1a0a0a',accent:'#FF4444',c1:'#FF79C6',c2:'#FF4444'},
+  // Wednesday - green
+  {bg:'#0a1a0a',accent:'#4ADE80',c1:'#86EFAC',c2:'#22C55E'},
+  // Thursday - orange/yellow
+  {bg:'#1a0f00',accent:'#FB923C',c1:'#FDE68A',c2:'#F97316'},
+  // Friday - blue/sky
+  {bg:'#0a0a1a',accent:'#60A5FA',c1:'#BAE6FD',c2:'#3B82F6'},
+  // Saturday - purple/dark
+  {bg:'#0f0a1a',accent:'#A855F7',c1:'#D8B4FE',c2:'#7C3AED'},
+];
+const DAY_ELEMENTS = ['ธาตุไฟ (ดวงอาทิตย์)','ธาตุน้ำ (ดวงจันทร์)','ธาตุไฟ (ดาวอังคาร)','ธาตุดิน (ดาวพุธ)','ธาตุอากาศ (ดาวพฤหัส)','ธาตุน้ำ (ดาวศุกร์)','ธาตุดิน (ดาวเสาร์)'];
+
+// ────── BIRTH DATE → DAY ────────────────────────────
+function thaiToGregorianYear(yearThai){ return yearThai - 543; }
+function getDayOfWeek(d,m,yThai){
+  const y = thaiToGregorianYear(yThai);
+  // Zeller-like
+  const dt = new Date(y,m-1,d);
+  return dt.getDay(); // 0=Sun..6=Sat
+}
+
+// ────── 31 BIRTH-DATE FORTUNES ─────────────────────
+const DATE_FORTUNE = {
+  1:{title:'วันที่ 1 — ผู้นำแห่งจักรวาล',power:'ความเป็นผู้นำสูง คิดใหญ่ มองการณ์ไกล พลังงานบวกล้นเหลือ เส้นทางชีวิตมักมีความโดดเด่น',love:'มีเสน่ห์ดึงดูด ความรักมักเริ่มต้นจากการชื่นชม แต่ต้องเรียนรู้การรับฟัง',money:'โชคทางการเงินดี ชอบเสี่ยง และมักได้ผลตอบแทนที่คุ้มค่า',health:'พลังงานสูง แต่ควรระวังความเครียดจากการแบกรับมากเกินไป',luck:9,stats:{พลัง:95,โชค:80,ความรัก:75,การงาน:90,สุขภาพ:78},color:'#FFD700',lucky:{color:'แดง-ทอง',number:'1, 10, 19',day:'วันอาทิตย์',gem:'ทับทิม',flower:'ดอกทานตะวัน'}},
+  2:{title:'วันที่ 2 — นักฝันแห่งดวงจันทร์',power:'จิตใจละเอียดอ่อน ความรู้สึกแหลมคม มีพรสวรรค์ด้านศิลปะและดนตรี ชีวิตมีความโรแมนติกสูง',love:'ความรักลึกซึ้งและจริงจัง ต้องการความมั่นคงทางอารมณ์ เป็นคู่ชีวิตที่ดีมาก',money:'ควรระวังการลงทุนที่รีบร้อน ความมั่งคั่งมาจากความสม่ำเสมอ',health:'ระวังเรื่องกระเพาะและระบบย่อยอาหาร พักผ่อนให้เพียงพอ',luck:7,stats:{พลัง:65,โชค:75,ความรัก:95,การงาน:70,สุขภาพ:72},color:'#C0C0C0',lucky:{color:'ขาว-เงิน',number:'2, 11, 20',day:'วันจันทร์',gem:'มุก',flower:'ดอกลิลลี่'}},
+  3:{title:'วันที่ 3 — นักสื่อสารแห่งดวงดาว',power:'พูดเก่ง มีไหวพริบ ความคิดสร้างสรรค์สูง ชีวิตสังคมดีเยี่ยม มีเพื่อนมาก',love:'ความรักสนุกสนาน อย่าลืมใส่ใจคู่รักในเรื่องลึกซึ้ง',money:'รายได้มาจากหลายทาง ชอบความหลากหลาย ระวังรายจ่ายที่ไม่จำเป็น',health:'ระวังระบบทางเดินหายใจ ออกกำลังกายสม่ำเสมอ',luck:8,stats:{พลัง:78,โชค:82,ความรัก:80,การงาน:85,สุขภาพ:75},color:'#FFD700',lucky:{color:'เหลือง-ส้ม',number:'3, 12, 21',day:'พฤหัสบดี',gem:'บุษราคัม',flower:'ดอกเบญจมาศ'}},
+  4:{title:'วันที่ 4 — ผู้สร้างรากฐาน',power:'ขยัน อดทน มีระเบียบ สร้างสิ่งยั่งยืน เชื่อถือได้ ผู้คนไว้ใจเสมอ',love:'ความรักมั่นคง จริงใจ รักนาน แต่ต้องพยายามแสดงออกมากขึ้น',money:'สร้างความมั่งคั่งด้วยความพยายาม ชอบการออม อสังหาริมทรัพย์เป็นโชค',health:'แข็งแรงทนทาน ระวังกระดูกและข้อต่อยามอายุมากขึ้น',luck:6,stats:{พลัง:82,โชค:65,ความรัก:72,การงาน:92,สุขภาพ:85},color:'#4ADE80',lucky:{color:'เขียว-น้ำตาล',number:'4, 13, 22',day:'วันพุธ',gem:'มรกต',flower:'ดอกกล้วยไม้'}},
+  5:{title:'วันที่ 5 — นักผจญภัยแห่งจักรวาล',power:'รักอิสระ ชอบการเดินทาง ปรับตัวเก่ง มีพลังงานสูง ชีวิตเต็มไปด้วยการค้นพบ',love:'รักสนุกสนาน ต้องการพื้นที่ส่วนตัว คู่ที่เข้าใจอิสระจะอยู่ด้วยกันได้นาน',money:'โชคมาจากการเดินทางและต่างถิ่น ธุรกิจหลายอย่างพร้อมกัน',health:'ระวังอุบัติเหตุจากความรีบ พักผ่อนให้เพียงพอ',luck:8,stats:{พลัง:88,โชค:85,ความรัก:78,การงาน:80,สุขภาพ:70},color:'#FB923C',lucky:{color:'ส้ม-แดง',number:'5, 14, 23',day:'วันอังคาร',gem:'โกเมน',flower:'ดอกกุหลาบ'}},
+  6:{title:'วันที่ 6 — ผู้พิทักษ์แห่งรัก',power:'ใจดี รักครอบครัว มีความรับผิดชอบสูง สร้างบรรยากาศที่อบอุ่น',love:'รักลึกซึ้งและเสียสละ เป็นคู่ชีวิตในอุดมคติ บ้านและครอบครัวสำคัญที่สุด',money:'รายได้มั่นคง ชอบลงทุนเพื่ออนาคต บ้านและที่ดินให้โชค',health:'ระวังเรื่องหัวใจและระบบไหลเวียนโลหิต ออกกำลังกายสม่ำเสมอ',luck:7,stats:{พลัง:72,โชค:78,ความรัก:98,การงาน:80,สุขภาพ:82},color:'#60A5FA',lucky:{color:'ฟ้า-ขาว',number:'6, 15, 24',day:'วันศุกร์',gem:'เพชร',flower:'ดอกมะลิ'}},
+  7:{title:'วันที่ 7 — นักปราชญ์แห่งลึกลับ',power:'ฉลาดลึก ชอบค้นคว้า มีญาณทิพย์ มองเห็นสิ่งที่คนอื่นมองไม่เห็น',love:'ต้องการคู่ที่เข้าใจความลึกซึ้ง รักแบบนักปรัชญา ใช้เวลาในการเปิดใจ',money:'โชคจากความรู้และปัญญา ธุรกิจด้านการศึกษาหรือวิทยาศาสตร์',health:'ระวังระบบประสาทและความเครียดสะสม ต้องการเวลาเงียบๆ',luck:7,stats:{พลัง:70,โชค:75,ความรัก:68,การงาน:90,สุขภาพ:72},color:'#A855F7',lucky:{color:'ม่วง-ดำ',number:'7, 16, 25',day:'วันเสาร์',gem:'นิล',flower:'ดอกไวโอเล็ต'}},
+  8:{title:'วันที่ 8 — ราชันแห่งอำนาจ',power:'อำนาจ ความสำเร็จ ความมั่งคั่ง มีพลังในการบริหารและจัดการ ชีวิตมักมีสถานะสูง',love:'รักอย่างมุ่งมั่น แต่อาจดูเย็นชา ต้องการคู่ที่เข้มแข็ง',money:'โชคลาภมหาศาล ธุรกิจใหญ่ การลงทุนระยะยาวให้ผล',health:'ระวังความดันโลหิต เรื่องหัวใจ ลดความเครียดจากการงาน',luck:8,stats:{พลัง:92,โชค:88,ความรัก:70,การงาน:97,สุขภาพ:75},color:'#FFD700',lucky:{color:'ดำ-ทอง',number:'8, 17, 26',day:'วันเสาร์',gem:'โอปอล',flower:'ดอกบัว'}},
+  9:{title:'วันที่ 9 — นักมนุษยธรรม',power:'มีจิตใจเมตตากรุณา ชอบช่วยเหลือ มีวิสัยทัศน์กว้างไกล เป็นแรงบันดาลใจให้คนอื่น',love:'รักอย่างไม่มีเงื่อนไข แต่อย่าลืมดูแลตัวเองด้วย',money:'โชคจากการเผยแพร่และสร้างประโยชน์ให้ผู้อื่น',health:'ระวังการเสียสละจนเกินไป ดูแลสุขภาพตัวเองด้วย',luck:9,stats:{พลัง:80,โชค:82,ความรัก:88,การงาน:85,สุขภาพ:78},color:'#F87171',lucky:{color:'แดง-ชมพู',number:'9, 18, 27',day:'วันอังคาร',gem:'ทับทิม',flower:'ดอกดาหลา'}},
+  10:{title:'วันที่ 10 — ผู้ยิ่งใหญ่แห่งโลก',power:'มีพลังพิเศษของทั้งวันที่ 1 และ 0 ความสมบูรณ์แบบ นำโชคมาให้ตัวเองและคนรอบข้าง',love:'เสน่ห์มาก คนชอบมาก แต่ต้องเลือกให้ดี',money:'โชคลาภมาก โดยเฉพาะด้านธุรกิจและการลงทุน',health:'โดยรวมดี ระวังความเย่อหยิ่งที่นำไปสู่การละเลยสุขภาพ',luck:9,stats:{พลัง:90,โชค:92,ความรัก:85,การงาน:88,สุขภาพ:80},color:'#FFD700',lucky:{color:'ทอง-แดง',number:'1, 10, 19',day:'วันอาทิตย์',gem:'ทองคำ',flower:'ดอกดาวเรือง'}},
+  11:{title:'วันที่ 11 — นักญาณทัศน์',power:'เลขมหาวิเศษ มีพรสวรรค์พิเศษ สัญชาตญาณแม่นยำ มักมีประสบการณ์เหนือธรรมชาติ',love:'รักบริสุทธิ์และสูงส่ง ต้องการความเข้าใจในระดับวิญญาณ',money:'โชคจากความคิดสร้างสรรค์และนวัตกรรม',health:'ระวังระบบประสาทและการนอนไม่หลับ',luck:9,stats:{พลัง:85,โชค:90,ความรัก:88,การงาน:87,สุขภาพ:72},color:'#C0C0C0',lucky:{color:'เงิน-ขาว',number:'11, 2, 20',day:'วันจันทร์',gem:'มุก',flower:'ดอกลิลลี่'}},
+  12:{title:'วันที่ 12 — ผู้เชี่ยวชาญทุกด้าน',power:'มีความสามารถหลากหลาย ปรับตัวเก่ง มีทั้งความเป็นผู้นำและผู้ตาม สมดุลดีเยี่ยม',love:'ความรักหลากรส เต็มไปด้วยสีสัน และความตื่นเต้น',money:'รายได้จากหลายแหล่ง ระวังการกระจายพลังงานมากเกินไป',health:'โดยรวมดี ต้องการสมดุลระหว่างการพักผ่อนและกิจกรรม',luck:8,stats:{พลัง:82,โชค:80,ความรัก:85,การงาน:83,สุขภาพ:80},color:'#FFD700',lucky:{color:'เหลือง-ส้ม',number:'3, 12, 21',day:'พฤหัสบดี',gem:'บุษราคัม',flower:'ดอกทานตะวัน'}},
+  13:{title:'วันที่ 13 — นักสู้ผู้กล้าหาญ',power:'ไม่กลัวความท้าทาย มีพลังภายในสูง เดินหน้าต่อแม้อุปสรรคมาก ชนะทุกอย่างด้วยความพยายาม',love:'รักอย่างกล้าหาญ แสดงออกตรงๆ ไม่อ้อมค้อม',money:'ต้องทำงานหนักแต่ผลตอบแทนจะมา ไม่ควรท้อแท้',health:'แข็งแรงมาก ระวังอุบัติเหตุและการบาดเจ็บ',luck:7,stats:{พลัง:90,โชค:70,ความรัก:78,การงาน:88,สุขภาพ:85},color:'#FF6B6B',lucky:{color:'แดง-ส้ม',number:'4, 13, 22',day:'วันอังคาร',gem:'โกเมน',flower:'ดอกกุหลาบแดง'}},
+  14:{title:'วันที่ 14 — นักเดินทางสู่เสรีภาพ',power:'รักอิสระสูงสุด ชีวิตเต็มไปด้วยการค้นพบ มีเสน่ห์ดึงดูดจากทั่วโลก',love:'ต้องการคู่ที่ให้อิสระ ความรักแบบเพื่อนสนิทที่ดีที่สุด',money:'โชคจากต่างประเทศ การเดินทาง และการสื่อสาร',health:'ระวังเรื่องกระดูกสันหลังจากการนั่งนานเวลาเดินทาง',luck:8,stats:{พลัง:85,โชค:83,ความรัก:80,การงาน:82,สุขภาพ:72},color:'#FB923C',lucky:{color:'ส้ม-ทอง',number:'5, 14, 23',day:'พฤหัสบดี',gem:'บุษราคัม',flower:'ดอกดาวเรือง'}},
+  15:{title:'วันที่ 15 — เทพเจ้าแห่งความรัก',power:'พลังงานแห่งความรักล้นเหลือ ทุกคนที่พบจะรู้สึกถึงความอบอุ่น มีพรพิเศษด้านความสัมพันธ์',love:'ได้รับและมอบความรักอย่างสมบูรณ์แบบ คู่ชีวิตที่ดีที่สุด',money:'โชคผ่านความสัมพันธ์ การร่วมมือ และหุ้นส่วน',health:'ระวังการเสียสละจนลืมดูแลสุขภาพตัวเอง',luck:8,stats:{พลัง:75,โชค:80,ความรัก:99,การงาน:78,สุขภาพ:80},color:'#FF79C6',lucky:{color:'ชมพู-แดง',number:'6, 15, 24',day:'วันศุกร์',gem:'เพชร',flower:'ดอกกุหลาบชมพู'}},
+  16:{title:'วันที่ 16 — นักสืบแห่งความจริง',power:'ปัญญาเฉียบแหลม ชอบค้นหาความจริง มีพลังวิเคราะห์สูง เข้าใจสิ่งต่างๆ ลึกกว่าคนอื่น',love:'รักด้วยเหตุผล ต้องการความเชื่อใจและความซื่อสัตย์มากที่สุด',money:'โชคจากการวิจัยและการค้นพบสิ่งใหม่',health:'ระวังความคิดมากจนนอนไม่หลับ ทำสมาธิ',luck:7,stats:{พลัง:72,โชค:75,ความรัก:70,การงาน:92,สุขภาพ:74},color:'#A855F7',lucky:{color:'ม่วง-ดำ',number:'7, 16, 25',day:'วันเสาร์',gem:'อเมทิสต์',flower:'ดอกลาเวนเดอร์'}},
+  17:{title:'วันที่ 17 — เจ้าแห่งอำนาจวาสนา',power:'ความสำเร็จมาจากการทำงานหนักอย่างมีระบบ มีความทะเยอทะยานสูง ชีวิตมักมีช่วงพลิกผัน',love:'รักอย่างมุ่งมั่นและจริงจัง มีความซื่อสัตย์สูง',money:'ความมั่งคั่งจากธุรกิจที่วางแผนดี การลงทุนระยะยาว',health:'ระวังกระดูก ข้อต่อ และการบาดเจ็บเรื้อรัง',luck:7,stats:{พลัง:88,โชค:72,ความรัก:75,การงาน:95,สุขภาพ:78},color:'#FFD700',lucky:{color:'ดำ-ทอง',number:'8, 17, 26',day:'วันเสาร์',gem:'โกเมน',flower:'ดอกคาร์เนชั่น'}},
+  18:{title:'วันที่ 18 — นักรบแห่งความดีงาม',power:'พลังเมตตาและความกล้าหาญรวมกัน ต่อสู้เพื่อสิ่งที่ถูกต้อง มีแรงบันดาลใจให้คนรอบข้าง',love:'รักอย่างเสียสละ พร้อมปกป้องคนที่รักเสมอ',money:'โชคจากการทำสิ่งที่เป็นประโยชน์ต่อสังคม',health:'โดยรวมแข็งแรง ระวังการรับแรงกดดันจากผู้อื่นมากเกินไป',luck:8,stats:{พลัง:86,โชค:80,ความรัก:85,การงาน:84,สุขภาพ:82},color:'#F87171',lucky:{color:'แดง-ชมพู',number:'9, 18, 27',day:'วันอังคาร',gem:'ทับทิม',flower:'ดอกดาหลา'}},
+  19:{title:'วันที่ 19 — ดวงอาทิตย์แห่งชีวิต',power:'พลังงานสูงสุด สร้างแรงบันดาลใจ ชีวิตเต็มไปด้วยแสงสว่าง มีพลังดึงดูดผู้คนอย่างน่าอัศจรรย์',love:'เสน่ห์มากมาย ความรักเต็มไปด้วยความอบอุ่นและพลังงาน',money:'โชคลาภจากความกล้าหาญและความเชื่อมั่น',health:'แข็งแรงดีเยี่ยม ระวังไม่ให้ใช้พลังงานมากเกินไป',luck:9,stats:{พลัง:96,โชค:88,ความรัก:90,การงาน:92,สุขภาพ:85},color:'#FFD700',lucky:{color:'ทอง-แดง',number:'1, 10, 19',day:'วันอาทิตย์',gem:'ทับทิม',flower:'ดอกทานตะวัน'}},
+  20:{title:'วันที่ 20 — นางฟ้าแห่งจันทรา',power:'ความงามทางจิตใจ มีพรด้านความสัมพันธ์ ชีวิตมักมีการช่วยเหลือจากผู้ใหญ่',love:'รักบริสุทธิ์และอ่อนโยน เป็นที่รักของทุกคน',money:'โชคจากความสัมพันธ์และการเชื่อมต่อ',health:'ระวังระบบย่อยอาหาร ดื่มน้ำให้มากพอ',luck:8,stats:{พลัง:68,โชค:82,ความรัก:92,การงาน:75,สุขภาพ:78},color:'#C0C0C0',lucky:{color:'ขาว-เงิน',number:'2, 11, 20',day:'วันจันทร์',gem:'มุก',flower:'ดอกไม้สีขาว'}},
+  21:{title:'วันที่ 21 — นักแสดงแห่งดวงดาว',power:'พรสวรรค์ด้านศิลปะการแสดง มีเสน่ห์ขณะอยู่เบื้องหน้า ชีวิตมีสีสันและความตื่นเต้นตลอดเวลา',love:'ความรักเต็มไปด้วยดราม่าและความโรแมนติก',money:'โชคจากงานสร้างสรรค์ ศิลปะ และการบันเทิง',health:'ระวังเรื่องเส้นเสียงและต่อมทอนซิล',luck:8,stats:{พลัง:80,โชค:82,ความรัก:82,การงาน:86,สุขภาพ:76},color:'#FFD700',lucky:{color:'เหลือง-ม่วง',number:'3, 21, 12',day:'พฤหัสบดี',gem:'บุษราคัม',flower:'ดอกดาวเรือง'}},
+  22:{title:'วันที่ 22 — สถาปนิกแห่งความฝัน',power:'เลขมหาวิเศษ มีความสามารถสร้างสรรค์สิ่งใหม่ได้จริง ความฝันกลายเป็นความจริง',love:'รักอย่างมั่นคงและสร้างสรรค์ สร้างบ้านที่แข็งแรงด้วยกัน',money:'สร้างความมั่งคั่งอย่างยั่งยืน โครงการใหญ่ๆ สำเร็จ',health:'โดยรวมดี ระวังความเครียดจากการรับงานมากเกินไป',luck:9,stats:{พลัง:88,โชค:88,ความรัก:82,การงาน:96,สุขภาพ:80},color:'#4ADE80',lucky:{color:'เขียว-ทอง',number:'4, 22, 13',day:'วันพุธ',gem:'มรกต',flower:'ดอกกล้วยไม้'}},
+  23:{title:'วันที่ 23 — ผู้สำรวจห้าทิศ',power:'ผจญภัย อยากรู้อยากเห็น ปรับตัวเก่งที่สุด มีพลังงานในการค้นหาสิ่งใหม่ไม่รู้จักเหนื่อย',love:'ความรักสนุกสนาน ต้องการคู่ที่ตามทันความคิด',money:'โชคจากการเดินทางและการค้าระหว่างประเทศ',health:'ระวังการนอนหลับไม่เพียงพอจากชีวิตที่วุ่นวาย',luck:8,stats:{พลัง:87,โชค:84,ความรัก:79,การงาน:83,สุขภาพ:73},color:'#FB923C',lucky:{color:'ส้ม-ฟ้า',number:'5, 23, 14',day:'วันพุธ',gem:'อความารีน',flower:'ดอกสายน้ำผึ้ง'}},
+  24:{title:'วันที่ 24 — ผู้ดูแลแห่งจักรวาล',power:'ความรับผิดชอบสูง ดูแลผู้อื่นด้วยหัวใจ มีพลังบำรุงและรักษา ทุกคนรู้สึกปลอดภัยเมื่ออยู่ใกล้',love:'คู่ชีวิตในอุดมคติ ดูแลเอาใจใส่ไม่เคยขาด',money:'โชคจากบ้านและครอบครัว อสังหาริมทรัพย์มีมูลค่า',health:'ระวังโรคเรื้อรังที่มาจากความเครียดสะสม',luck:7,stats:{พลัง:74,โชค:78,ความรัก:96,การงาน:80,สุขภาพ:82},color:'#60A5FA',lucky:{color:'ฟ้า-เขียว',number:'6, 24, 15',day:'วันศุกร์',gem:'อความารีน',flower:'ดอกฟ้า'}},
+  25:{title:'วันที่ 25 — ผู้เปิดประตูแห่งปัญญา',power:'ความลึกซึ้งทางจิตใจ มีพรสวรรค์ด้านการเยียวยา สัญชาตญาณเหนือธรรมชาติที่แม่นยำ',love:'รักอย่างลึกซึ้ง ต้องการความสงบและความเข้าใจ',money:'โชคจากความรู้ การสอน และการบำบัด',health:'ระวังระบบประสาทและความเครียดสะสม ต้องการธรรมชาติ',luck:8,stats:{พลัง:72,โชค:80,ความรัก:74,การงาน:88,สุขภาพ:76},color:'#A855F7',lucky:{color:'ม่วง-ฟ้า',number:'7, 25, 16',day:'วันจันทร์',gem:'อเมทิสต์',flower:'ดอกลาเวนเดอร์'}},
+  26:{title:'วันที่ 26 — นักสร้างอาณาจักร',power:'ความมุ่งมั่นในระดับโลก มีพลังสร้างสิ่งยิ่งใหญ่ ชีวิตมักมีการขึ้นสู่อำนาจในช่วงท้าย',love:'ความรักจริงจัง ต้องการคู่ที่มีเป้าหมายร่วมกัน',money:'ความมั่งคั่งมาในช่วงกลางและปลายชีวิต ต้องอดทน',health:'ระวังโรคจากการทำงานหนักเกินไป พักผ่อนบ้าง',luck:7,stats:{พลัง:90,โชค:72,ความรัก:72,การงาน:96,สุขภาพ:76},color:'#FFD700',lucky:{color:'ดำ-ทอง',number:'8, 26, 17',day:'วันเสาร์',gem:'โอนิกซ์',flower:'ดอกกล้วยไม้ดำ'}},
+  27:{title:'วันที่ 27 — ผู้รักษาโลก',power:'จิตใจกว้างขวาง รักมนุษยชาติ มีพรพิเศษในการรักษาและเยียวยา เป็นที่พึ่งของทุกคน',love:'ความรักไม่มีขีดจำกัด ครอบคลุมทุกคนรอบข้าง',money:'โชคจากการทำงานเพื่อสาธารณะ และสิ่งที่เป็นประโยชน์',health:'ดูแลสุขภาพตัวเองบ้าง อย่าลืมตัวเองในขณะดูแลผู้อื่น',luck:9,stats:{พลัง:82,โชค:85,ความรัก:90,การงาน:87,สุขภาพ:80},color:'#F87171',lucky:{color:'ชมพู-ม่วง',number:'9, 27, 18',day:'วันอังคาร',gem:'ทับทิม',flower:'ดอกบัว'}}
+};
+// fill remaining dates
+for(let i=28;i<=31;i++){
+  const base=[28,29,30,31];
+  const data=[
+    {title:'วันที่ 28 — ผู้สร้างสะพานแห่งเวลา',power:'มีความเชื่อมโยงระหว่างอดีตและอนาคต ปัญญาสูง รู้จักเรียนรู้จากประสบการณ์',love:'รักมั่นคง ซื่อสัตย์ มีความทรงจำที่ดีเกี่ยวกับความสัมพันธ์',money:'สร้างรายได้จากประสบการณ์และความเชี่ยวชาญ',health:'โดยรวมดี ระวังข้อต่อและกระดูก',luck:7,stats:{พลัง:80,โชค:78,ความรัก:82,การงาน:86,สุขภาพ:80},color:'#4ADE80',lucky:{color:'เขียว-น้ำตาล',number:'1, 10, 28',day:'วันพุธ',gem:'มรกต',flower:'ดอกกล้วยไม้'}},
+    {title:'วันที่ 29 — นักฝันแห่งจันทราเต็มดวง',power:'จินตนาการสูง มีพรสวรรค์ด้านศิลปะและการสร้างสรรค์ ชีวิตเต็มไปด้วยแรงบันดาลใจ',love:'รักโรแมนติก ฝันถึงความรักในอุดมคติ',money:'โชคจากความคิดสร้างสรรค์ งานศิลปะ',health:'ระวังระบบประสาทและอารมณ์แปรปรวน',luck:8,stats:{พลัง:72,โชค:85,ความรัก:90,การงาน:80,สุขภาพ:74},color:'#C0C0C0',lucky:{color:'เงิน-ขาว',number:'2, 11, 29',day:'วันจันทร์',gem:'มุก',flower:'ดอกลิลลี่'}},
+    {title:'วันที่ 30 — ราชาแห่งสายเลือดสูงส่ง',power:'ศักดิ์ศรีสูง มีเสน่ห์ธรรมชาติ คนให้ความเคารพนับถือ ชีวิตมักมีบทบาทสำคัญในสังคม',love:'รักอย่างภูมิฐาน มีมาตรฐาน ต้องการคู่ที่เทียบเคียงได้',money:'โชคจากการลงทุนและสถานะในสังคม',health:'ระวังหัวใจและความดันโลหิต',luck:8,stats:{พลัง:85,โชค:82,ความรัก:80,การงาน:90,สุขภาพ:78},color:'#FFD700',lucky:{color:'ทอง-น้ำเงิน',number:'3, 12, 30',day:'พฤหัสบดี',gem:'บุษราคัม',flower:'ดอกดาวเรือง'}},
+    {title:'วันที่ 31 — นักปฏิวัติแห่งจักรวาล',power:'พลังเปลี่ยนแปลงสูงสุด มีพรในการสร้างสิ่งใหม่จากซากเก่า ชีวิตมักมีการเปลี่ยนแปลงครั้งใหญ่',love:'ความรักที่เปลี่ยนแปลงและเติบโต ไม่หยุดนิ่ง',money:'โชคจากการลงทุนที่กล้าและแตกต่าง',health:'ระวังระบบประสาทส่วนกลาง นอนหลับให้เพียงพอ',luck:8,stats:{พลัง:88,โชค:84,ความรัก:80,การงาน:88,สุขภาพ:76},color:'#FB923C',lucky:{color:'ส้ม-แดง',number:'4, 13, 31',day:'วันอังคาร',gem:'โกเมน',flower:'ดอกกุหลาบส้ม'}}
+  ];
+  DATE_FORTUNE[i]=data[i-28];
+}
+
+// ─── วันตกฝาก (Thai unlucky days based on birth day) ────────
+function getFallingDays(dayOfWeek, birthDay, birthMonth, birthYear){
+  // วันตกฝาก based on birth weekday — traditional Thai astrology
+  const fallingRules = {
+    0:['วันพุธกลางคืน','วันศุกร์'], // อาทิตย์
+    1:['วันพุธ','วันเสาร์'],          // จันทร์
+    2:['วันอาทิตย์','วันพฤหัสบดี'],   // อังคาร
+    3:['วันอาทิตย์','วันพฤหัสบดี'],   // พุธ (กลางวัน)
+    4:['วันอังคาร','วันเสาร์'],         // พฤหัสบดี
+    5:['วันพุธกลางคืน','วันอาทิตย์'],  // ศุกร์
+    6:['วันจันทร์','วันพุธกลางวัน'],   // เสาร์
+  };
+  const warn={
+    0:'วันพุธกลางคืนและวันศุกร์ — ระวังการตัดสินใจสำคัญ เดินทางไกล และเริ่มกิจการใหม่',
+    1:'วันพุธและวันเสาร์ — ไม่ควรย้ายบ้าน ลงนามสัญญา หรือเริ่มความสัมพันธ์ใหม่',
+    2:'วันอาทิตย์และวันพฤหัสบดี — ระวังการทะเลาะเบาะแว้ง และการตัดสินใจทางการเงิน',
+    3:'วันอาทิตย์และวันพฤหัสบดี — ระวังเรื่องสุขภาพและการเดินทางระยะไกล',
+    4:'วันอังคารและวันเสาร์ — ไม่ควรเริ่มโครงการใหม่หรือทำธุรกิจสำคัญ',
+    5:'วันพุธกลางคืนและวันอาทิตย์ — ระวังการทำสัญญาและการพบปะคนแปลกหน้า',
+    6:'วันจันทร์และวันพุธกลางวัน — ระวังอุบัติเหตุและการเงินรั่วไหล',
+  };
+  const today=new Date();
+  // Generate upcoming falling dates in current year
+  const days=fallingRules[dayOfWeek]||[];
+  const dayMap={'วันอาทิตย์':0,'วันจันทร์':1,'วันอังคาร':2,'วันพุธ':3,'วันพุธกลางคืน':3,'วันพุธกลางวัน':3,'วันพฤหัสบดี':4,'วันศุกร์':5,'วันเสาร์':6};
+  const results=[];
+  days.forEach(d=>{
+    const dn=dayMap[d]??-1;
+    if(dn<0) return;
+    // find next occurrence
+    const nxt=new Date(today);
+    const diff=(dn-nxt.getDay()+7)%7||7;
+    nxt.setDate(nxt.getDate()+diff);
+    results.push({label:d,date:`${nxt.getDate()}/${nxt.getMonth()+1}/${nxt.getFullYear()+543}`,full:`${DAYS[nxt.getDay()]}ที่ ${nxt.getDate()} เดือน ${nxt.getMonth()+1}`});
+  });
+  return {days:results, warn:warn[dayOfWeek]||''};
+}
+
+// ─── PIXEL CHARACTER SPRITES (canvas-drawn) ─────────────────
+const DAY_CHAR_COLORS = [
+  {body:'#FF6B35',hair:'#FFD700',skin:'#FDBCB4',dress:'#FF4444',eye:'#8B4513'},  // Sun
+  {body:'#87CEEB',hair:'#C0C0C0',skin:'#FDBCB4',dress:'#4169E1',eye:'#4169E1'},  // Mon
+  {body:'#FF6B6B',hair:'#8B0000',skin:'#FDBCB4',dress:'#DC143C',eye:'#8B0000'},  // Tue
+  {body:'#90EE90',hair:'#228B22',skin:'#FDBCB4',dress:'#2E8B57',eye:'#006400'},  // Wed
+  {body:'#FFA500',hair:'#8B4513',skin:'#FDBCB4',dress:'#FF8C00',eye:'#8B4513'},  // Thu
+  {body:'#FFB6C1',hair:'#FF69B4',skin:'#FDBCB4',dress:'#FF1493',eye:'#FF69B4'},  // Fri
+  {body:'#9370DB',hair:'#4B0082',skin:'#FDBCB4',dress:'#8B008B',eye:'#4B0082'},  // Sat
+];
+
+function drawPixelChar(canvas, dayIdx, scale=2){
+  const c=DAY_CHAR_COLORS[dayIdx];
+  const ctx=canvas.getContext('2d');
+  const W=canvas.width, H=canvas.height;
+  ctx.clearRect(0,0,W,H);
+  const px=(x,y,w,h,col)=>{ctx.fillStyle=col;ctx.fillRect(x*scale,y*scale,w*scale,h*scale)};
+  // hair
+  px(4,1,6,1,c.hair); px(3,2,8,1,c.hair); px(3,3,2,1,c.hair); px(9,3,2,1,c.hair);
+  px(3,8,1,2,c.hair); px(10,8,1,2,c.hair);
+  // face
+  px(4,3,6,5,c.skin);
+  // eyes
+  px(5,5,1,1,c.eye); px(8,5,1,1,c.eye);
+  // mouth
+  px(6,7,2,1,'#FF8888');
+  // dress/body
+  px(4,8,6,4,c.dress); px(3,9,1,3,c.body); px(10,9,1,3,c.body);
+  // arms
+  px(2,9,2,1,c.skin); px(10,9,2,1,c.skin);
+  // legs
+  px(5,12,2,2,c.skin); px(7,12,2,2,c.skin);
+  // shoes
+  px(4,14,3,1,c.body); px(7,14,3,1,c.body);
+  // antenna/magic
+  px(7,0,1,2,c.hair); px(6,0,1,1,c.dress); px(8,0,1,1,c.dress);
+}
+
+// Mini sprites for sprite row (16x16)
+function drawMiniSprite(canvas, idx){
+  const c=DAY_CHAR_COLORS[idx];
+  const ctx=canvas.getContext('2d');
+  ctx.clearRect(0,0,16,16);
+  const px=(x,y,w,h,col)=>{ctx.fillStyle=col;ctx.fillRect(x,y,w,h)};
+  px(5,1,6,1,c.hair); px(4,2,8,1,c.hair);
+  px(5,2,6,4,c.skin);
+  px(6,4,1,1,c.eye); px(9,4,1,1,c.eye);
+  px(4,6,8,4,c.dress);
+  px(3,7,2,1,c.skin); px(11,7,2,1,c.skin);
+  px(5,10,3,2,c.skin); px(8,10,3,2,c.skin);
+}
+
+// ─── BUILD STAR LAYER ───────────────────────────────────────
+function buildStars(){
+  const sl=document.getElementById('starLayer');
+  for(let i=0;i<60;i++){
+    const s=document.createElement('div');
+    s.className='px-star';
+    s.style.cssText=`left:${Math.random()*100}%;top:${Math.random()*60}%;animation-delay:${Math.random()*3}s;animation-duration:${1+Math.random()*2}s;width:${Math.random()<.3?8:4}px;height:${Math.random()<.3?8:4}px;opacity:${0.3+Math.random()*.7}`;
+    sl.appendChild(s);
+  }
+}
+
+// sparkle particles
+function buildSparkles(){
+  const so=document.getElementById('sparkleOverlay');
+  for(let i=0;i<25;i++){
+    const sp=document.createElement('div');
+    sp.className='sp';
+    sp.style.cssText=`left:${Math.random()*100}%;animation-duration:${4+Math.random()*6}s;animation-delay:${Math.random()*6}s;width:${Math.random()<.3?12:6}px;height:${Math.random()<.3?12:6}px;background:${['#FFD700','#FF79C6','#67E8F9','#C084FC'][Math.floor(Math.random()*4)]}`;
+    so.appendChild(sp);
+  }
+}
+
+// sprite row
+function buildSpriteRow(){
+  const row=document.getElementById('spriteRow');
+  row.innerHTML='';
+  for(let i=0;i<7;i++){
+    const cv=document.createElement('canvas');
+    cv.width=16; cv.height=16;
+    cv.className='sprite-icon';
+    cv.title=DAYS[i];
+    drawMiniSprite(cv,i);
+    row.appendChild(cv);
+  }
+}
+
+// ─── MAIN FORTUNE FUNCTION ───────────────────────────────────
+function castFortune(){
+  const d=parseInt(document.getElementById('bDay').value)||0;
+  const m=parseInt(document.getElementById('bMonth').value)||1;
+  const y=parseInt(document.getElementById('bYear').value)||0;
+
+  if(!d||d<1||d>31||!y||y<2400||y>2600){
+    shakeCard(); return;
+  }
+
+  const dow=getDayOfWeek(d,m,y);
+  const dateFort=DATE_FORTUNE[d]||DATE_FORTUNE[1];
+  const {days:fallingDays,warn:fallingWarn}=getFallingDays(dow,d,m,y);
+
+  // render result
+  renderResult(dow,dateFort,fallingDays,fallingWarn,d,m,y);
+  document.getElementById('resultPanel').classList.add('show');
+  document.getElementById('resultPanel').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function shakeCard(){
+  const c=document.getElementById('inputCard');
+  c.style.animation='none';
+  c.style.transform='translateX(-8px)';
+  setTimeout(()=>{c.style.transform='translateX(8px)';
+  setTimeout(()=>{c.style.transform='translateX(-6px)';
+  setTimeout(()=>{c.style.transform='translateX(6px)';
+  setTimeout(()=>{c.style.transform='translateX(0)';},80)},80)},80)},80);
+}
+
+function renderResult(dow,df,fallingDays,fallingWarn,d,m,y){
+  // Character canvas
+  const cc=document.getElementById('charCanvas');
+  drawPixelChar(cc,dow,3);
+
+  document.getElementById('rDayName').textContent=`วัน${DAYS[dow]}`;
+  document.getElementById('rDayEn').textContent=`Born on ${DAYS_EN[dow]} · ${df.title.split('—')[0].trim()}`;
+  document.getElementById('rElement').textContent=DAY_ELEMENTS[dow];
+
+  // Stat bars
+  const statColors=['#FF6B35','#FFD700','#FF79C6','#67E8F9','#4ADE80'];
+  const statNames=Object.keys(df.stats);
+  const statVals=Object.values(df.stats);
+  document.getElementById('statBars').innerHTML=statNames.map((n,i)=>`
+    <div class="stat-row">
+      <div class="stat-label-row">
+        <span class="stat-name">${n}</span>
+        <span class="stat-score">${statVals[i]}/100</span>
+      </div>
+      <div class="pixel-bar-track">
+        <div class="pixel-bar-fill" style="width:0;background:repeating-linear-gradient(90deg,${statColors[i%5]} 0,${statColors[i%5]} 6px,rgba(0,0,0,.2) 6px,rgba(0,0,0,.2) 8px)"
+          data-w="${statVals[i]}"></div>
+      </div>
+    </div>
+  `).join('');
+  // animate bars
+  setTimeout(()=>document.querySelectorAll('.pixel-bar-fill').forEach(b=>{b.style.width=b.dataset.w+'%'}),100);
+
+  // Prophecy cards
+  document.getElementById('prophecyGrid').innerHTML=`
+    <div class="proph-card love" data-icon="♥">
+      <div class="proph-title">LOVE</div>
+      <div class="proph-text">${df.love}</div>
+    </div>
+    <div class="proph-card money" data-icon="$">
+      <div class="proph-title">MONEY</div>
+      <div class="proph-text">${df.money}</div>
+    </div>
+    <div class="proph-card health" data-icon="+">
+      <div class="proph-title">HEALTH</div>
+      <div class="proph-text">${df.health}</div>
+    </div>
+    <div class="proph-card luck" data-icon="★">
+      <div class="proph-title">LUCK x${df.luck}</div>
+      <div class="proph-text">${'★'.repeat(df.luck)}${'☆'.repeat(10-df.luck)}<br>ดาวโชคชะตา ${df.luck}/10</div>
+    </div>`;
+
+  // Lucky items
+  const lu=df.lucky;
+  document.getElementById('luckyGrid').innerHTML=`
+    <div class="lucky-item"><span class="lucky-icon">🎨</span><span class="lucky-label">COLOR</span><span class="lucky-val">${lu.color}</span></div>
+    <div class="lucky-item"><span class="lucky-icon">🔢</span><span class="lucky-label">NUMBER</span><span class="lucky-val">${lu.number}</span></div>
+    <div class="lucky-item"><span class="lucky-icon">📅</span><span class="lucky-label">LUCKY DAY</span><span class="lucky-val">${lu.day}</span></div>
+    <div class="lucky-item"><span class="lucky-icon">💎</span><span class="lucky-label">GEM</span><span class="lucky-val">${lu.gem}</span></div>
+    <div class="lucky-item"><span class="lucky-icon">🌸</span><span class="lucky-label">FLOWER</span><span class="lucky-val">${lu.flower}</span></div>
+    <div class="lucky-item"><span class="lucky-icon">✨</span><span class="lucky-label">ELEMENT</span><span class="lucky-val">${DAY_ELEMENTS[dow].split('(')[0].trim()}</span></div>`;
+
+  // Falling days
+  document.getElementById('rFallingDesc').textContent=fallingWarn||'ระวังในวันเหล่านี้เป็นพิเศษ';
+  document.getElementById('fallingGrid').innerHTML=fallingDays.map(fd=>`
+    <div class="falling-item">
+      <div class="falling-date">${fd.label}</div>
+      <div class="falling-desc">วันตกฝากถัดไป: ${fd.date}</div>
+    </div>`).join('')||'<div style="color:var(--text-muted);font-size:.8rem;font-family:Sarabun">ไม่พบข้อมูลวันตกฝาก</div>';
+
+  // Big prophecy
+  document.getElementById('bigProph').textContent=`${df.title} — ${df.power} เกิดวัน${DAYS[dow]}แปลว่าคุณมีพลังพิเศษของดาว${DAYS[dow]}คอยคุ้มครอง ${DAY_ELEMENTS[dow]}เป็นธาตุประจำตัว ชีวิตในปีนี้จะเต็มไปด้วยโอกาสสำคัญ ขอให้ระลึกถึงสิ่งมงคลของคุณในวันที่รู้สึกอ่อนแอ สีมงคล${lu.color} ตัวเลขโชค${lu.number} จะเป็นเพื่อนแท้ตลอดเส้นทาง`;
+}
+
+function resetForm(){
+  document.getElementById('resultPanel').classList.remove('show');
+  document.getElementById('inputCard').scrollIntoView({behavior:'smooth'});
+}
+
+// ─── INIT ───────────────────────────────────────────────────
+buildStars();
+buildSparkles();
+buildSpriteRow();
+
+// Enter key
+document.addEventListener('keydown',e=>{if(e.key==='Enter')castFortune();});
+
+// Auto-fill example on click
+document.getElementById('bDay').addEventListener('focus',()=>{
+  if(!document.getElementById('bDay').value) document.getElementById('bDay').placeholder='เช่น 15';
+});
+</script>
+</body>
+</html>
